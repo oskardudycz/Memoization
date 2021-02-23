@@ -101,5 +101,10 @@ namespace Memoization
 
 ```
 
+## TO DO
+- [x] - basic sample and introduction
+- [ ] - thread-safe sample using `ConcurrentDictionary`
+- [ ] - Use generators or currying techniques
+- [ ] - Sample in JavaScript/TypeScript
 
 See the [Program.cs](./Memoization/Program.cs) to debug the code.
