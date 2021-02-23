@@ -15,32 +15,54 @@ namespace Memoization
                 type => hasAttribute(type, typeof(SomeCustomAttribute));
             
             Func<Type, bool> hasSomeCustomAttributeMemo = hasSomeCustomAttribute.Memoize();
-                
+            
+            // Function will be called, as result wasn't memoized
             hasSomeCustomAttributeMemo(typeof(FirstTypeWithAttribute));
+            // Function will be called, as this is not memoized function
             hasSomeCustomAttribute(typeof(FirstTypeWithAttribute));
+            // Function will NOT be called, as result was memoized
             hasSomeCustomAttributeMemo(typeof(FirstTypeWithAttribute));
             
+            // Function will be called, as we memoized result of the different input value (other attribute)
             hasSomeCustomAttributeMemo(typeof(SecondTypeWithAttribute));
+            // Function will be called, as this is not memoized function
             hasSomeCustomAttribute(typeof(SecondTypeWithAttribute));
+            // Function will NOT be called, as result was memoized
             hasSomeCustomAttributeMemo(typeof(SecondTypeWithAttribute));
         }
     }
 
     public static class Memoizer
     {
+        /// <summary>
+        /// Memoizes provided function. Function should provide deterministic results.
+        /// For the same input it should return the same result.
+        /// Memoized function for the specific input will be called once, further calls will use cache.
+        /// </summary>
+        /// <param name="func">function to be memoized</param>
+        /// <typeparam name="TInput">Type of the function input value</typeparam>
+        /// <typeparam name="TResult">Type of the function result</typeparam>
+        /// <returns></returns>
         public static Func<TInput, TResult> Memoize<TInput, TResult>(this Func<TInput, TResult> func)
         {
+            // create cache ("memo")
             var memo = new Dictionary<TInput, TResult>();
 
+            // wrap provided function with cache handling
             return input =>
             {
+                // check if result for set input was already cached
                 if (memo.TryGetValue(input, out var fromMemo))
+                    // if yes, return value
                     return fromMemo;
 
+                // if no, call function
                 var result = func(input);
-
+                
+                // cache the result
                 memo.Add(input, result);
 
+                // return result
                 return result;
             };
         }
