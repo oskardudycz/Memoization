@@ -2,7 +2,7 @@
 
 # Memoization
 
-Memoization is a useful technique that allows easily calls optimizations. The sample shows how the memoization works and how to implement it in C#.
+Memoization is a useful technique that allows easily optimize method calls. The sample shows how the memoization works and how to implement it in C#.
 
 It takes a function and wraps it in the method to check if the provided input function was already called. If yes, then it will return value from the cache. If not - it'll return the cached value without running the function.
 
