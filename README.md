@@ -2,7 +2,7 @@
 
 # Memoization
 
-The sample shows how the memoization works and how to implement it in C#. Memoization is a useful technique that allows easily calls optimizations.
+Memoization is a useful technique that allows easily optimize method calls. The sample shows how the memoization works and how to implement it in C#.
 
 It takes a function and wraps it in the method to check if the provided input function was already called. If yes, then it will return value from the cache. If not - it'll return the cached value without running the function.
 
@@ -115,5 +115,11 @@ public static Func<TInput, TResult> Memoize<TInput, TResult>(this Func<TInput, T
     return input => memo.GetOrAdd(input, func);
 }
 ```
-
 See the [Program.cs](./Memoization/Program.cs) to debug the code.
+
+## TO DO
+- [x] - basic sample and introduction
+- [x] - thread-safe sample using `ConcurrentDictionary`
+- [ ] - enhance the type check for reference type params
+- [ ] - Use generators or currying techniques
+- [ ] - Sample in JavaScript/TypeScript
