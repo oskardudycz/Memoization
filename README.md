@@ -98,8 +98,22 @@ namespace Memoization
         
     }
 }
-
 ```
 
+Of course, above implementation is quite naive, e.g. it's not thread-safe. We could enhance and simplify that by using [ConcurrentDictionary](https://docs.microsoft.com/en-us/dotnet/standard/collections/thread-safe/how-to-add-and-remove-items) class:
+
+```csharp
+public static Func<TInput, TResult> Memoize<TInput, TResult>(this Func<TInput, TResult> func)
+{
+    // create cache ("memo")
+    var memo = new ConcurrentDictionary<TInput, TResult>();
+
+    // wrap provided function with cache handling
+    // get a value from cache if it exists
+    // if not, call factory method
+    // ConcurrentDictionary will handle that internally
+    return input => memo.GetOrAdd(input, func);
+}
+```
 
 See the [Program.cs](./Memoization/Program.cs) to debug the code.
