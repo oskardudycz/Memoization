@@ -117,6 +117,8 @@ public static Func<TInput, TResult> Memoize<TInput, TResult>(this Func<TInput, T
 ```
 See the [Program.cs](./Memoization/Program.cs) to debug the code.
 
+Read more in my article ["Memoization, a useful pattern for quick optimization"](https://event-driven.io/en/memoization_a_useful_pattern_for_quick_optimisation).
+
 ## TO DO
 - [x] - basic sample and introduction
 - [x] - thread-safe sample using `ConcurrentDictionary`
