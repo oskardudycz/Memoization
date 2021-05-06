@@ -115,7 +115,46 @@ public static Func<TInput, TResult> Memoize<TInput, TResult>(this Func<TInput, T
     return input => memo.GetOrAdd(input, func);
 }
 ```
-See the [Program.cs](./Memoization/Program.cs) to debug the code.
+
+This version is still not perfect. When we are memoizing many items, our cache may grow exponentially and generate a memory usage issue. Generally, we'd like to keep in memory only the actively accessed entries. Not accessed, we can evict. We'd like to be able to set up a top limit of entries in our cache. To do that, we can use a [MemoryCache](https://docs.microsoft.com/en-us/aspnet/core/performance/caching/memory?view=aspnetcore-5.0) class. A sample implementation can look like this:
+
+```csharp
+public static Func<TInput, TResult> Memoize<TInput, TResult>(this Func<TInput, TResult> func)
+{
+    // create cache ("memo")
+    var memo = new MemoryCache(new MemoryCacheOptions
+    {
+        // Set cache size limit.
+        // Note: this is not size in bytes,
+        // but sum of all entries' sizes.
+        // Entry size is declared on adding to cache
+        // in the factory method 
+        SizeLimit = 100
+    });
+    
+    // wrap provided function with cache handling
+    // get a value from cache if it exists
+    // if not, call factory method
+    // MemCache will handle that internally
+    return input => memo.GetOrCreate(input, entry =>
+    {
+        // you can set different options like e.g.
+        // sliding expiration - time between now and last time
+        // and the last time the entry was accessed 
+        entry.SlidingExpiration = TimeSpan.FromSeconds(3);
+        
+        // this value is used to calculate total SizeLimit
+        entry.Size = 1;
+        return func(input);
+    });
+}
+```
+
+See:
+- Simple implementation: [Memoizer.cs](./Memoization/Memoizer.cs)
+- Thread-Safe implementation with [ConcurrentDictionary](https://docs.microsoft.com/en-us/dotnet/standard/collections/thread-safe/how-to-add-and-remove-items): [ThreadSafeMemoizer.cs](./Memoization/ThreadSafeMemoizer.cs)
+- Implementation with cache eviction with a [MemoryCache](https://docs.microsoft.com/en-us/aspnet/core/performance/caching/memory?view=aspnetcore-5.0): [MemoryCacheMemoizer.cs](./Memoization/MemoryCacheMemoizer.cs),
+- the [Program.cs](./Memoization/Program.cs) to debug the code.
 
 Read more in my article ["Memoization, a useful pattern for quick optimization"](https://event-driven.io/en/memoization_a_useful_pattern_for_quick_optimisation).
 
