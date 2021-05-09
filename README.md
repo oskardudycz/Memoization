@@ -150,7 +150,71 @@ public static Func<TInput, TResult> Memoize<TInput, TResult>(this Func<TInput, T
 }
 ```
 
-See:
+In functional programming, recursion is a widespread practice. It's non-trivial as to understand recursion, you need to understand recursion. It can be computation expensive. How to use the Memoization with recursion? Let's take the Fibonacci sequence as an example. The rule is: the next number is found by adding up the two numbers before it.
+
+```csharp
+int Fibonacci(int n1)
+{
+    if (n1 <= 2)
+        return 1;
+                
+    return Fibonacci(n1 -1) + Fibonacci(n1 - 2);
+}
+```
+
+We'll need to find a way to inject the memoized version of the Fibonacci function. Let's start with breaking out function into the main and the overload:
+
+```csharp
+int Fibonacci(int n1)
+{
+    return Fibonacci(n1, Fibonacci);
+}
+
+int Fibonacci(int n1, Func<int, int> fibonacci)
+{        
+    if (n1 <= 2)
+        return 1;
+        
+    return fibonacci(n1 -1) + fibonacci(n1 - 2);
+}
+```
+
+Now instead of the direct self-call, we can inject the function to use while doing recursion. Now we have the possibility to memoize it by doing:
+
+```csharp
+Func<int, int> fibonacci = null;
+            
+fibonacci = Memoizer.Memoize((int n1)  => Fibonacci(n1, fibonacci));
+            
+var result = fibonacci(3);
+```
+
+The other way is to use the local function:
+
+```csharp
+Func<int, int> fibonacci = null;
+
+fibonacci = n1 =>
+{
+    numberOfCalls++;
+    
+    if (n1 <= 2)
+        return 1;
+    
+    return fibonacci(n1 - 1) + fibonacci(n1 - 2);
+};
+
+fibonacci = fibonacci.Memoize();
+
+
+var result = fibonacci(3);
+```
+
+The trick is that the local _fibonacci_ function is lazily evaluated. That means that effectively it will use the assigned, memoized function while doing the call. I know that analyzing recursion can create a headache. It may be more accessible by debugging the tests:
+- [Regular function](./Memoization.Tests/RecurrsionWithFunctionTests.cs)
+- [Local function](./Memoization.Tests/RecurrsionWithLocalFunctionTests.cs)
+
+See also:
 - Simple implementation: [Memoizer.cs](./Memoization/Memoizer.cs)
 - Thread-Safe implementation with [ConcurrentDictionary](https://docs.microsoft.com/en-us/dotnet/standard/collections/thread-safe/how-to-add-and-remove-items): [ThreadSafeMemoizer.cs](./Memoization/ThreadSafeMemoizer.cs)
 - Implementation with cache eviction with a [MemoryCache](https://docs.microsoft.com/en-us/aspnet/core/performance/caching/memory?view=aspnetcore-5.0): [MemoryCacheMemoizer.cs](./Memoization/MemoryCacheMemoizer.cs),
